@@ -10,9 +10,11 @@
 namespace kgladkiy\behaviors;
 
 use yii\base\Behavior;
+use yii\helpers\ArrayHelper;
 
 class NestedSetQueryBehavior extends Behavior
 {
+
     /**
      * @var ActiveQuery the owner of this behavior.
      */
@@ -32,7 +34,7 @@ class NestedSetQueryBehavior extends Behavior
         return $this->owner;
     }
 
-    public function tree($root = false, $level = null)
+    public function tree($root = false, $maxLevel = false)
     {
 
         $tree = [];
@@ -41,14 +43,18 @@ class NestedSetQueryBehavior extends Behavior
             $ownerClass = $this->owner->modelClass;
             $items = $ownerClass::find()->roots()->all();
         } else {
-            $items = $root->children()->all();
+            if (!$maxLevel || $root->level <= $maxLevel) {
+                $items = $root->children()->all();
+            } else {
+                return $tree;
+            }
         }
 
         foreach ($items as $item) {
             $tree[$item->id] = [
                 'id' => $item->id,
                 'name' => $item->{$item->titleAttribute},
-                'children' => $this->tree($item),
+                'children' => (!$maxLevel || $item->level < $maxLevel) ? $this->tree($item, $maxLevel) : null,
             ];
         }
 
@@ -56,43 +62,24 @@ class NestedSetQueryBehavior extends Behavior
 
     }
 
-    public function options($root = 0, $level = null, $path = null, $exclude = null)
+    public function options($root = false, $maxLevel = false)
     {
-        $res = [];
-        if (is_object($root) && $root->id != $exclude) {
-            $res[$root->{$root->idAttribute}] = $path
-                . ((($root->{$root->levelAttribute}) > 1) ? ' -> ': '')
-                . $root->{$root->titleAttribute};
 
-            if ($level) {
-                foreach ($root->children()->all() as $childRoot) {
-                    $res += $this->options($childRoot, $level - 1, $level, $exclude);
-                }
-            } elseif (is_null($level)) {
-                foreach ($root->children()->all() as $childRoot) {
-                    $res += $this->options($childRoot, null, ($path) ? $path . ' -> ' . $root->{$root->titleAttribute} : $root->{$root->titleAttribute}, $exclude);
+        $tree = $this->tree($root, $maxLevel);
+
+        $map = function($items, $parentName) use (&$map) {
+            $results = [];
+            foreach ($items as $item) {
+                $results[$item['id']] = ($parentName) ? $parentName . ' -> ' . $item['name'] : $item['name'];
+                if ($item['children']) {
+                    $results += $map($item['children'], $results[$item['id']]);
                 }
             }
-        } elseif (is_scalar($root) && $root != $exclude) {
-            if ($root == 0) {
-                foreach ($this->roots()->all() as $rootItem) {
-                    if ($level) {
-                        $res += $this->options($rootItem, $level - 1, $rootItem->{$rootItem->titleAttribute}, $exclude);
-                    } elseif (is_null($level)) {
-                        $res += $this->options($rootItem, null, null, $exclude);
-                    }
-                }
-            } else {
-                $modelClass = $this->owner->modelClass;
-                $model = new $modelClass;
-                $root = $modelClass::find()->andWhere([$model->idAttribute => $root])->one();
-                if ($root) {
-                    $res += $this->options($root, $level);
-                }
-                unset($model);
-            }
-        }
-        return $res;
+            return $results;
+        };
+
+        return $map($tree, false);
+
     }
 
 }

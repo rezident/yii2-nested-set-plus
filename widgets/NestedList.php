@@ -18,6 +18,8 @@ class NestedList extends Widget
 
     public $items = null;
 
+    public $maxDepth = 4;
+
     public $wrapClass = 'nested';
 
     public $actions = true;
@@ -79,7 +81,7 @@ class NestedList extends Widget
         $view = $this->getView();
 
         NestedListAsset::register($view);
-        $js = "$('." . $this->wrapClass . "').nestable();";
+        $js = "$('." . $this->wrapClass . "').nestable({'maxDepth':" . $this->maxDepth . "});";
         $view->registerJs($js);
 
     }
