@@ -17,7 +17,7 @@
     box-sizing: border-box;
     -moz-box-sizing: border-box;
 }
-.nested-handle:hover { color: #2e6da4; background: #ddd; }
+.nested-handle:hover { color: #00a375; background: #ddd; }
 .nested-actions {
     position: absolute;
     top: 6px;
