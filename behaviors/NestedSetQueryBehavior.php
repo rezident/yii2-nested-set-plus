@@ -10,6 +10,9 @@
 namespace rezident\nestedsetplus\behaviors;
 
 use yii\base\Behavior;
+use yii\base\Model;
+use yii\db\ActiveQuery;
+use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 
 class NestedSetQueryBehavior extends Behavior
@@ -37,14 +40,15 @@ class NestedSetQueryBehavior extends Behavior
     /**
      * Returns a tree data as array
      *
-     * @param bool|ActiveRecord|NestedSetQuery $root Parent item for a tree data (false, if from root item)
+     * @param bool|Model|NestedSetBehavior $root Parent item for a tree data (false, if from root item)
      * @param bool|integer $maxLevel Max level for a tree data (false for no limit)
      * @param string $keyAttribute Attribute of model for array key
+     * @param string[] $extraAttributes Additional attribute names for include to tree
      * @return array
      */
-    public function tree($root = false, $maxLevel = false, $keyAttribute = 'id')
+    public function tree($root = false, $maxLevel = false, $keyAttribute = 'id', array $extraAttributes = [])
     {
-
+        /** @var NestedSetBehavior|Model $items */
         $tree = [];
 
         if ($root === false) {
@@ -52,6 +56,7 @@ class NestedSetQueryBehavior extends Behavior
             $items = $ownerClass::find()->roots()->all();
         } else {
             if (!$maxLevel || $root->level <= $maxLevel) {
+
                 $items = $root->children()->all();
             } else {
                 return $tree;
@@ -62,8 +67,12 @@ class NestedSetQueryBehavior extends Behavior
             $tree[$item->$keyAttribute] = [
                 'id' => $item->id,
                 'name' => $item->{$item->titleAttribute},
-                'children' => (!$maxLevel || $item->level < $maxLevel) ? $this->tree($item, $maxLevel, $keyAttribute) : null,
+                'children' => (!$maxLevel || $item->level < $maxLevel) ? $this->tree($item, $maxLevel, $keyAttribute, $extraAttributes) : null,
             ];
+
+            if(count($extraAttributes) > 0) {
+                $tree[$item->$keyAttribute] = ArrayHelper::merge($tree[$item->$keyAttribute], $item->toArray($extraAttributes));
+            }
         }
 
         return $tree;
