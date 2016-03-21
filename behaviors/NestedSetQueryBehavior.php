@@ -34,7 +34,15 @@ class NestedSetQueryBehavior extends Behavior
         return $this->owner;
     }
 
-    public function tree($root = false, $maxLevel = false)
+    /**
+     * Returns a tree data as array
+     *
+     * @param bool|ActiveRecord|NestedSetQuery $root Parent item for a tree data (false, if from root item)
+     * @param bool|integer $maxLevel Max level for a tree data (false for no limit)
+     * @param string $keyAttribute Attribute of model for array key
+     * @return array
+     */
+    public function tree($root = false, $maxLevel = false, $keyAttribute = 'id')
     {
 
         $tree = [];
@@ -51,7 +59,7 @@ class NestedSetQueryBehavior extends Behavior
         }
 
         foreach ($items as $item) {
-            $tree[$item->id] = [
+            $tree[$item->$keyAttribute] = [
                 'id' => $item->id,
                 'name' => $item->{$item->titleAttribute},
                 'children' => (!$maxLevel || $item->level < $maxLevel) ? $this->tree($item, $maxLevel) : null,
