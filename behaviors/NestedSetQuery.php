@@ -7,7 +7,7 @@
  * @version   0.2
  */
 
-namespace kgladkiy\behaviors;
+namespace rezident\nestedsetplus\behaviors;
 
 class NestedSetQuery extends \yii\db\ActiveQuery
 {

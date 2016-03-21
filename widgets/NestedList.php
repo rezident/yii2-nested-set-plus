@@ -7,7 +7,7 @@
  * @version   0.2
  */
 
-namespace kgladkiy\widgets;
+namespace rezident\nestedsetplus\widgets;
 
 use yii\base\Widget;
 use yii\helpers\Html;

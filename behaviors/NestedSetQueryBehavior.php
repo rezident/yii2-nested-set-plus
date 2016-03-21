@@ -7,7 +7,7 @@
  * @version   0.2
  */
 
-namespace kgladkiy\behaviors;
+namespace rezident\nestedsetplus\behaviors;
 
 use yii\base\Behavior;
 use yii\helpers\ArrayHelper;

@@ -17,13 +17,13 @@ The preferred way to install this extension is through [composer](http://getcomp
 Either run
 
 ```sh
-php composer.phar require kgladkiy/yii2-nested-set-plus "*"
+php composer.phar require rezident/yii2-nested-set-plus "*"
 ```
 
 or add
 
 ```json
-"kgladkiy/yii2-nested-set-plus": "*"
+"rezident/yii2-nested-set-plus": "*"
 ```
 
 to the require section of your `composer.json` file.
