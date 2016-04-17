@@ -100,7 +100,7 @@ class NestedSetBehavior extends Behavior
      */
     public function descendants($depth = null)
     {
-        $query = $this->owner->find()->orderBy([$this->levelAttribute => SORT_ASC, $this->leftAttribute => SORT_ASC]);
+        $query = $this->owner->find()->orderBy([$this->leftAttribute => SORT_ASC]);
         $db = $this->owner->getDb();
         $query->andWhere($db->quoteColumnName($this->leftAttribute) . '>'
             . $this->owner->getAttribute($this->leftAttribute));
